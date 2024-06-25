@@ -67,11 +67,8 @@ DJANGO_MIDDLEWARE = [
 THIRD_PARTY_MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
 ]
-LOCAL_MIDDLEWARE = [
-    'student_insurance.core.project.common.middleware.authentication.JWTAuthMiddleware',
-]
 
-MIDDLEWARE = DJANGO_MIDDLEWARE + THIRD_PARTY_MIDDLEWARE + LOCAL_MIDDLEWARE
+MIDDLEWARE = DJANGO_MIDDLEWARE + THIRD_PARTY_MIDDLEWARE
 
 
 ROOT_URLCONF = "core.urls"
