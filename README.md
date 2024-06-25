@@ -10,9 +10,9 @@ A social network with te ability to register, login and send content to desired 
 |djangorestframework-simplejwt      | 5.3.1   |
 
 # How to install and run project?
-1.create .envs directory like .sample_envs
+1. Create .envs directory like .sample_envs
 
-2.Go into virtual environment and run the command in below:
+2. Go into virtual environment and run the command in below:
 
 ```
 $ pip install -r requirments/base.txt
