@@ -379,16 +379,6 @@ core/.idea/**/libraries
 # Mongo Explorer plugin:
 core/.idea/**/mongoSettings.xml
 
-
-# migrations
-./migrations
-.migrations
-migrations/
-migrations/.
-/base/migrations
-/accident/migrations
-/map/migrations
-
 ## File-based project format:
 *.iws
 

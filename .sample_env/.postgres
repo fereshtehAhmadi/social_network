@@ -1,0 +1,7 @@
+# PostgresQL
+# ------------------------------------------------------------------------------
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=db_name
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
