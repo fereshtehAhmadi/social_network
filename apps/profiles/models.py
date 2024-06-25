@@ -15,7 +15,7 @@ class User(BaseModel, AbstractUser):
         return f"{self.last_name} {self.first_name}"
 
     phone_number = models.CharField(
-        # validators=[PhoneNumberValidator],
+        validators=[PhoneNumberValidator],
         max_length=17,
         blank=True,
         null=True,
