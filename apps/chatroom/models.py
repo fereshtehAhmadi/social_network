@@ -41,4 +41,3 @@ class Message(BaseModel):
         verbose_name = "Message"
         verbose_name_plural = "Message"
         default_related_name = "messages"
-
