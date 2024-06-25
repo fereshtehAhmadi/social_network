@@ -34,6 +34,7 @@ class Message(BaseModel):
         null=True, blank=True,
         upload_to=file_message_path,
     )
+    seen = models.BooleanField(default=True)
 
     STR_RETURN_LIST = ["pk", "sender__user__id"]
 

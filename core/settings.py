@@ -54,6 +54,7 @@ LOCAL_INSTALLED_APP = [
     "apps.base",
     "apps.profiles",
     "apps.chatroom",
+    "apps.sms",
 ]
 
 INSTALLED_APPS = DJANGO_INSTALLED_APPS + TIRD_INSTALLED_APPS + LOCAL_INSTALLED_APP

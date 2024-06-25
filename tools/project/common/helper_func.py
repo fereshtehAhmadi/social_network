@@ -10,7 +10,7 @@ class FactoryGetObject:
     @classmethod
     def find_object(cls, object_type, *args, **kwargs):
         try:
-            if hasattr(object_type, "is_available") and "is_available" not in kwargs:
+            if hasattr(object_type, "is_active") and "is_active" not in kwargs:
                 return object_type.available_objects.get(*args, **kwargs)
         except:
             name = str(object_type).split(".")[-1][0:-2]
@@ -20,7 +20,7 @@ class FactoryGetObject:
 
     @classmethod
     def filter_object(cls, object_type, *args, **kwargs):
-        if hasattr(object_type, "is_available"):
+        if hasattr(object_type, "is_active"):
             return object_type.available_objects.filter(*args, **kwargs)
 
     @classmethod
