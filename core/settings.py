@@ -53,9 +53,23 @@ TIRD_INSTALLED_APPS = [
 LOCAL_INSTALLED_APP = [
     "apps.base",
     "apps.profiles",
+    "apps.chatroom",
 ]
 
 INSTALLED_APPS = DJANGO_INSTALLED_APPS + TIRD_INSTALLED_APPS + LOCAL_INSTALLED_APP
+
+
+# AUTHENTICATION
+# ------------------------------------------------------------------------------
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+AUTH_USER_MODEL = "profiles.User"
+ROLEPERMISSIONS_REGISTER_ADMIN = False
+ROLEPERMISSIONS_SUPERUSER_SUPERPOWERS = False
+ROLEPERMISSIONS_MODULE = 'tools.project.common.roles'
+
 
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
@@ -210,14 +224,13 @@ CELERY_TASK_SEND_SENT_EVENT = True
 # -------------------------------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        # "student_insurance.core.project.authorization.CustomerTokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
         "rest_framework.authentication.TokenAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
-    "EXCEPTION_HANDLER": "student_insurance.core.django.exception_handler.custom_handler.custom_exception_handler",
-    "DEFAULT_RENDERER_CLASSES": ("student_insurance.core.django.exception_handler.renderer.ProjectRender",),
+    "EXCEPTION_HANDLER": "tools.django.exception_handler.custom_handler.custom_exception_handler",
+    "DEFAULT_RENDERER_CLASSES": ("tools.django.exception_handler.renderer.ProjectRender",),
     "DEFAULT_FILTER_BACKENDS": (
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
@@ -227,7 +240,7 @@ REST_FRAMEWORK = {
 # EXCEPTION HANDLER
 # -------------------------------------------------------------------------------
 EXCEPTIONS_HOG = {
-    "EXCEPTION_REPORTING": "student_insurance.core.django.exception_handler.handler.exception_reporter",
+    "EXCEPTION_REPORTING": "tools.django.exception_handler.handler.exception_reporter",
     "ENABLE_IN_DEBUG": False,
     "NESTED_KEY_SEPARATOR": "__",
     "SUPPORT_MULTIPLE_EXCEPTIONS": True,
