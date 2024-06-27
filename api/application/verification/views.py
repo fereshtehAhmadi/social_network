@@ -3,7 +3,8 @@ import uuid
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rolepermissions.checkers import has_role
 from rolepermissions.roles import assign_role
@@ -11,7 +12,7 @@ from rolepermissions.roles import assign_role
 from api.application.verification.serializers import (
     AppLoginCreateOtpSerializer,
     AppLoginValidateOtpSerializer,
-    AppLoginCreateTokenSerializer,
+    AppLoginCreateTokenSerializer, AppUserInformationPostSerializer, AppUserInformationGetSerializer,
 )
 from apps.profiles.models import CustomerProfile, User
 from tools.project.common.constants.cons import manualParametersDictCons
@@ -27,7 +28,8 @@ manualParametersDict = dict(
 operation_id = dict(
     login_with_otp="لاگین > دریافت کد ورود",
     login_validate_otp="لاگین > اعتبارسنجی کد ورود",
-    edit_profile="ویرایش اطلاعات",
+    user_information_get="لاگین > نمایش اطلاعات کاربر",
+    user_information_post="لاگین > ارسال اطلاعات کاربر",
 )
 
 tags = ['verification/احراز هویت']
@@ -50,7 +52,16 @@ class AppVerificationAPI(viewsets.ViewSet):
                 "request_body": AppLoginValidateOtpSerializer,
                 "responses": {200: AppLoginCreateTokenSerializer},
             },
+            user_information_post={
+                "request_body": AppUserInformationPostSerializer,
+                "responses": {200: "OK"},
+            }
             ),
+        GET=dict(
+            user_information_get={
+                "responses": {200: AppUserInformationGetSerializer},
+            }
+        ),
     )
 
     def get_serializer_class(self):
@@ -120,3 +131,39 @@ class AppVerificationAPI(viewsets.ViewSet):
         data = {"refresh": str(refresh), "access": str(refresh.access_token)}
         AppVerificationService.delete_redis_otp_code(phone_number=user.phone_number)
         return Response(data)
+
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="GET",
+            action_name="user_information_get",
+            serializer=serializers_dict.get("GET"),
+        )
+    )
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="POST",
+            action_name="user_information_post",
+            serializer=serializers_dict.get("POST"),
+        )
+    )
+    @action(methods=["GET", "POST"], detail=False, parser_classes=(FormParser, MultiPartParser), permission_classes=[IsAuthenticated])
+    def user_information(self, request, **kwargs):
+        """
+        display and update user information
+        first_name, last_name, avatar
+        """
+        if request.method == 'POST':
+            customer_profile = CustomerProfile.objects.filter(user=request.user).first()
+            serializer = AppUserInformationPostSerializer(instance=request.user, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            avatar = serializer.validated_data.pop('avatar', None)
+            serializer.save()
+
+            customer_profile.avatar = avatar
+            customer_profile.save()
+
+        else:
+            serializer = AppUserInformationGetSerializer(request.user)
+            return Response(serializer.data)
+
+        return Response("OK")
