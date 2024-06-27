@@ -12,7 +12,7 @@ class AppProfileInformationGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'bio', 'slug']
+        fields = ['id', 'first_name', 'last_name', 'avatar', 'bio', 'slug']
 
     def get_avatar(self, obj):
         return get_dynamic_attr(obj, 'customer_profiles.get_dynamic_url')
@@ -25,4 +25,4 @@ class AppProfileInformationPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomerProfile
-        fields = ['username', 'first_name', 'last_name', 'avatar', 'bio', 'slug', ]
+        fields = ['first_name', 'last_name', 'avatar', 'bio', 'slug', ]
