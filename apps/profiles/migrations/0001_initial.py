@@ -90,7 +90,7 @@ class Migration(migrations.Migration):
                         max_length=17,
                         null=True,
                         validators=[
-                            tools.project.common.validators.PhoneNumberValidator
+
                         ],
                         verbose_name="phone_number",
                     ),

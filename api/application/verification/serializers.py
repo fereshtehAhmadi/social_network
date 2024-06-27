@@ -3,7 +3,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.profiles.models import User
 from tools.django.django_tools import get_dynamic_attr
-from tools.project.common.validators import PhoneNumberValidator
+from tools.project.common.validators import phone_regex
 
 
 class AppLoginCreateOtpSerializer(serializers.Serializer):
@@ -13,7 +13,7 @@ class AppLoginCreateOtpSerializer(serializers.Serializer):
         required=True,
         allow_null=False,
         allow_blank=False,
-        validators=[PhoneNumberValidator],
+        validators=[phone_regex],
     )
     otp_code_length = serializers.IntegerField(default=5, allow_null=False, min_value=3)
     expire_time = serializers.IntegerField(
@@ -34,7 +34,7 @@ class AppLoginValidateOtpSerializer(serializers.Serializer):
     code = serializers.CharField(allow_null=False, allow_blank=False)
     phone_number = serializers.CharField(max_length=11, min_length=11, required=True, allow_null=False,
                                          allow_blank=False,
-                                         validators=[PhoneNumberValidator])
+                                         validators=[phone_regex])
     token_class = RefreshToken
 
     @classmethod

@@ -8,7 +8,7 @@ from django.conf import settings
 
 from apps.base.models import BaseModel
 from apps.profiles.user_managers import CustomUserManager
-from tools.project.common.validators import PhoneNumberValidator
+from tools.project.common.validators import phone_regex, slug_regex
 
 
 class User(BaseModel, AbstractUser):
@@ -16,7 +16,7 @@ class User(BaseModel, AbstractUser):
         return f"{self.last_name} {self.first_name}"
 
     phone_number = models.CharField(
-        validators=[PhoneNumberValidator],
+        validators=[phone_regex],
         max_length=17,
         blank=True,
         null=True,
@@ -43,17 +43,17 @@ class CustomerProfile(BaseModel):
             "_".join([str(random.randint(1000000000, 9999999999)), filename]),
         )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
     avatar = models.FileField(
         max_length=500,
         null=True, blank=True,
         upload_to=customer_profile_avatar_path,
     )
     bio = models.TextField(null=True, blank=True)
-    slug = models.CharField(max_length=15, null=True, blank=True)
+    slug = models.CharField(max_length=15, null=True, blank=True, validators=[slug_regex], unique=True)
 
     STR_RETURN_LIST = ["pk", "user__id"]
-    UNIQUE_CHECK_LIST = [(["is_active", "slug"], Q()), ('user', Q())]
+    UNIQUE_CHECK_LIST = [(["slug", "is_active"], Q()), ('user', Q())]
 
     class Meta:
         verbose_name = "Customer Profile"
