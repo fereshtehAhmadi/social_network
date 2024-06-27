@@ -21,3 +21,4 @@ $ pip install -r requirments/base.txt
 2.python manage.py migrate
 
 3.python manage.py runserver
+
