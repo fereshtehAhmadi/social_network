@@ -60,7 +60,6 @@ class AppConnectionsAPI(viewsets.ViewSet):
     def users_list(self, request, **kwargs):
         """
         display users list
-
         """
         customers = CustomerProfilesFilter(request.GET).qs.filter(is_active=True).order_by('id')
         return Response(AppUserListSerializer(customers, many=True).data)
