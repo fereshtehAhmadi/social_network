@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.profiles.models import User
+from apps.profiles.models import User, CustomerProfile
 from tools.django.django_tools import get_dynamic_attr
 
 
@@ -17,9 +17,10 @@ class AppProfileInformationGetSerializer(serializers.ModelSerializer):
         return get_dynamic_attr(obj, 'customer_profiles.get_dynamic_url')
 
 
-class AppUserInformationPostSerializer(serializers.ModelSerializer):
-    avatar = serializers.FileField(allow_null=True, required=False)
+class AppProfileInformationPostSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(default=None)
+    last_name = serializers.CharField(default=None)
 
     class Meta:
-        model = User
-        fields = ['first_name', 'last_name', 'avatar', ]
+        model = CustomerProfile
+        fields = ['first_name', 'last_name', 'avatar', 'bio', 'slug', ]

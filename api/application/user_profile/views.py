@@ -5,7 +5,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.application.user_profile.serializers import AppProfileInformationGetSerializer
+from api.application.user_profile.serializers import (
+    AppProfileInformationGetSerializer,
+    AppProfileInformationPostSerializer,
+)
 from apps.profiles.models import CustomerProfile
 from tools.project.common.constants.cons import manualParametersDictCons
 from tools.project.swagger_tools import SwaggerAutoSchemaKwargs
@@ -16,7 +19,7 @@ manualParametersDict = dict(
 
 operation_id = dict(
     profile_information_get="نمایش اطلاعات کاربر",
-    user_information_post="ارسال اطلاعات کاربر",
+    profile_information_post="ارسال اطلاعات کاربر",
 )
 
 tags = ['profile/پروفایل']
@@ -35,12 +38,12 @@ class AppProfileAPI(viewsets.ViewSet):
                 "responses": {200: AppProfileInformationGetSerializer},
             }
         ),
-        # POST=dict(
-        #     profile_information={
-        #         "request_body": AppUserInformationPostSerializer,
-        #         "responses": {200: "OK"},
-        #     }
-        # )
+        POST=dict(
+            profile_information_post={
+                "request_body": AppProfileInformationPostSerializer,
+                "responses": {200: "OK"},
+            }
+        )
     )
 
     def get_serializer_class(self):
@@ -57,29 +60,32 @@ class AppProfileAPI(viewsets.ViewSet):
             serializer=serializers_dict.get("GET"),
         )
     )
-    # @swagger_auto_schema(
-    #     **get_swagger_kwargs(
-    #         method="POST",
-    #         action_name="profile_information_post",
-    #         serializer=serializers_dict.get("POST"),
-    #     )
-    # )
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="POST",
+            action_name="profile_information_post",
+            serializer=serializers_dict.get("POST"),
+        )
+    )
     @action(methods=["GET", "POST"], detail=False, parser_classes=(FormParser, MultiPartParser))
     def profile_information(self, request, **kwargs):
         """
         display and update user information
         first_name, last_name, avatar
         """
-        # if request.method == 'POST':
-        #     customer_profile = CustomerProfile.objects.filter(user=request.user).first()
-        #     serializer = AppUserInformationPostSerializer(instance=request.user, data=request.data)
-        #     serializer.is_valid(raise_exception=True)
-        #     avatar = serializer.validated_data.pop('avatar', None)
-        #     serializer.save()
-        #
-        #     customer_profile.avatar = avatar
-        #     customer_profile.save()
-        #
-        # else:
-        serializer = AppProfileInformationGetSerializer(request.user)
-        return Response(serializer.data)
+        if request.method == 'POST':
+            customer_profile = CustomerProfile.objects.filter(user=request.user).first()
+            serializer = AppProfileInformationPostSerializer(instance=customer_profile, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            first_name = serializer.validated_data.pop('first_name')
+            last_name = serializer.validated_data.pop('last_name')
+            serializer.save()
+
+            customer_profile.user.first_name = first_name
+            customer_profile.user.last_name = last_name
+            customer_profile.user.save()
+            return Response('OK')
+
+        else:
+            serializer = AppProfileInformationGetSerializer(request.user)
+            return Response(serializer.data)
