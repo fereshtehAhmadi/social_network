@@ -27,9 +27,10 @@ manualParametersDict = dict(
 operation_id = dict(
     login_with_otp="لاگین > دریافت کد ورود",
     login_validate_otp="لاگین > اعتبارسنجی کد ورود",
+    edit_profile="ویرایش اطلاعات",
 )
 
-tags = []
+tags = ['verification/احراز هویت']
 operationDescriptionsDict = dict()
 get_swagger_kwargs = SwaggerAutoSchemaKwargs(
     manualParametersDict, operationDescriptionsDict, tags, operation_id
@@ -119,4 +120,3 @@ class AppVerificationAPI(viewsets.ViewSet):
         data = {"refresh": str(refresh), "access": str(refresh.access_token)}
         AppVerificationService.delete_redis_otp_code(phone_number=user.phone_number)
         return Response(data)
-

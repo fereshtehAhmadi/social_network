@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 from apps.base.models import BaseModel
 from apps.profiles.user_managers import CustomUserManager
@@ -59,6 +60,10 @@ class CustomerProfile(BaseModel):
         verbose_name_plural = "Customer Profile"
         default_related_name = "customer_profiles"
 
+    @property
+    def get_dynamic_url(self):
+        return f"{settings.IMAGE_URL_SERVE}{settings.MEDIA_URL}{self.avatar}"
+
 
 class AdminProfile(BaseModel):
     def admin_profile_avatar_path(self, filename):
@@ -81,3 +86,7 @@ class AdminProfile(BaseModel):
         verbose_name = "Admin Profile"
         verbose_name_plural = "Admin Profile"
         default_related_name = "admin_profiles"
+
+    @property
+    def get_dynamic_url(self):
+        return f"{settings.IMAGE_URL_SERVE}{settings.MEDIA_URL}{self.avatar}"
