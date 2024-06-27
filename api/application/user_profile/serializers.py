@@ -21,7 +21,6 @@ class AppProfileInformationGetSerializer(serializers.ModelSerializer):
 class AppProfileInformationPostSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(default=None)
     last_name = serializers.CharField(default=None)
-    username = serializers.CharField(required=True)
 
     class Meta:
         model = CustomerProfile
