@@ -8,8 +8,11 @@ from rest_framework.response import Response
 from rolepermissions.checkers import has_role
 from rolepermissions.roles import assign_role
 
-from api.application.verification.serializers import AppLoginCreateOtpSerializer, AppLoginValidateOtpSerializer, \
-    AppLoginCreateTokenSerializer
+from api.application.verification.serializers import (
+    AppLoginCreateOtpSerializer,
+    AppLoginValidateOtpSerializer,
+    AppLoginCreateTokenSerializer,
+)
 from apps.profiles.models import CustomerProfile, User
 from tools.project.common.constants.cons import manualParametersDictCons
 from tools.project.common.constants.model_cons import UserRoleChoice
