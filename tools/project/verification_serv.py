@@ -40,3 +40,8 @@ class AppVerificationService:
 
         if code != r.get(phone_number).decode("utf-8"):
             raise ValidationError(detail={'message': 'Incorrect otp code'}, code='wrong_otp_code')
+
+    @staticmethod
+    def delete_redis_otp_code(phone_number, **kwargs):
+        r = redis.StrictRedis()
+        r.delete(phone_number)

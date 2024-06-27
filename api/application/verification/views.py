@@ -1,11 +1,18 @@
+import uuid
+
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rolepermissions.checkers import has_role
+from rolepermissions.roles import assign_role
 
-from api.application.verification.serializers import AppLoginCreateOtpSerializer
+from api.application.verification.serializers import AppLoginCreateOtpSerializer, AppLoginValidateOtpSerializer, \
+    AppLoginCreateTokenSerializer
+from apps.profiles.models import CustomerProfile, User
 from tools.project.common.constants.cons import manualParametersDictCons
+from tools.project.common.constants.model_cons import UserRoleChoice
 from tools.project.sms.service import SmsCreatorService
 from tools.project.swagger_tools import SwaggerAutoSchemaKwargs
 from tools.project.verification_serv import AppVerificationService
@@ -35,10 +42,10 @@ class AppVerificationAPI(viewsets.ViewSet):
                 "request_body": AppLoginCreateOtpSerializer,
                 "responses": {200: "OK"},
             },
-            # login_validate_otp={
-            #     "request_body": CustomerAppLoginValidateOtpInputSerializer,
-            #     "responses": {200: CustomerAppLoginValidateOtpOutputSerializer},
-            # },
+            login_validate_otp={
+                "request_body": AppLoginValidateOtpSerializer,
+                "responses": {200: AppLoginCreateTokenSerializer},
+            },
             ),
     )
 
@@ -58,7 +65,10 @@ class AppVerificationAPI(viewsets.ViewSet):
     )
     @action(methods=["POST"], detail=False, url_path="login/create_otp")
     def login_with_otp(self, request, **kwargs):
-        serializer = AppLoginCreateOtpSerializer(request.data)
+        """
+        send otp code to users phone number
+        """
+        serializer = AppLoginCreateOtpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         validate_data = serializer.validated_data
 
@@ -76,26 +86,34 @@ class AppVerificationAPI(viewsets.ViewSet):
         SmsCreatorService()(sms_data=sms_data)
         return Response("OK")
 
-    # @swagger_auto_schema(
-    #     **get_swagger_kwargs(
-    #         method="POST",
-    #         action_name="login_validate_otp",
-    #         serializer=serializers_dict.get("POST"),
-    #     )
-    # )
-    # @action(methods=["POST"], detail=False, url_path="login/validate_otp")
-    # def login_validate_otp(self, request, **kwargs):
-    #     """
-    #     :post: Validate otp code sent for entered phone_number \n
-    #
-    #     :param request: post request object
-    #     :param kwargs: None
-    #
-    #     :return:
-    #         - post: refresh and access token json, 200 status code
-    #     :rtype:
-    #         - post: json
-    #
-    #     """
-    #     pass
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="POST",
+            action_name="login_validate_otp",
+            serializer=serializers_dict.get("POST"),
+        )
+    )
+    @action(methods=["POST"], detail=False, url_path="login/validate_otp")
+    def login_validate_otp(self, request, **kwargs):
+        """
+        validate otp code and get or create user
+        output: jwt token
+        """
+        serializer = AppLoginValidateOtpSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        AppVerificationService.validate_redis_otp_code(**serializer.validated_data)
+        user = User.objects.filter(phone_number=serializer.validated_data.get('phone_number'))
+        if user and has_role(user, UserRoleChoice.CUSTOMER):
+            pass
+        else:
+            user = User.objects.create(username=f'customer_{serializer.validated_data.get("phone_number")}',
+                                       phone_number=serializer.validated_data.get("phone_number"))
+            user.set_password(str(uuid.uuid4))
+            assign_role(user=user, role=UserRoleChoice.CUSTOMER)
+            CustomerProfile.objects.get_or_create(user=user)
+
+        refresh = AppLoginValidateOtpSerializer.get_token(user)
+        data = {"refresh": str(refresh), "access": str(refresh.access_token)}
+        AppVerificationService.delete_redis_otp_code(phone_number=user.phone_number)
+        return Response(data)
 
