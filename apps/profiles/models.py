@@ -40,7 +40,7 @@ class CustomerProfile(BaseModel):
     def customer_profile_avatar_path(self, filename):
         return "customer_profile/{0}/avatar/{1}".format(
             str(self.user.id),
-            "_".join([filename, str(random.randint(1000000000, 9999999999))]),
+            "_".join([str(random.randint(1000000000, 9999999999)), filename]),
         )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -62,14 +62,17 @@ class CustomerProfile(BaseModel):
 
     @property
     def get_dynamic_url(self):
-        return f"{settings.IMAGE_URL_SERVE}{settings.MEDIA_URL}{self.avatar}"
+        if self.avatar:
+            return f"{settings.IMAGE_URL_SERVE}{settings.MEDIA_URL}{self.avatar}"
+        else:
+            return None
 
 
 class AdminProfile(BaseModel):
     def admin_profile_avatar_path(self, filename):
         return "customer_profile/{0}/avatar/{1}".format(
             str(self.user.id),
-            "_".join([filename, str(random.randint(1000000000, 9999999999))]),
+            "_".join([str(random.randint(1000000000, 9999999999)), filename]),
         )
 
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -89,4 +92,7 @@ class AdminProfile(BaseModel):
 
     @property
     def get_dynamic_url(self):
-        return f"{settings.IMAGE_URL_SERVE}{settings.MEDIA_URL}{self.avatar}"
+        if self.avatar:
+            return f"{settings.IMAGE_URL_SERVE}{settings.MEDIA_URL}{self.avatar}"
+        else:
+            return None

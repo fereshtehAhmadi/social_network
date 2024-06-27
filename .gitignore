@@ -515,6 +515,10 @@ gita/media/
 
 core/media
 
+media/
+/media
+/media/*
+
 .pytest_cache/
 .ipython/
 .env

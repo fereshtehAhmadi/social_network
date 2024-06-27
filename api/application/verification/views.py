@@ -106,7 +106,7 @@ class AppVerificationAPI(viewsets.ViewSet):
         serializer = AppLoginValidateOtpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         AppVerificationService.validate_redis_otp_code(**serializer.validated_data)
-        user = User.objects.filter(phone_number=serializer.validated_data.get('phone_number'))
+        user = User.objects.filter(phone_number=serializer.validated_data.get('phone_number')).first()
         if user and has_role(user, UserRoleChoice.CUSTOMER):
             pass
         else:

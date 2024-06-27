@@ -119,11 +119,11 @@ MIDDLEWARE = DJANGO_MIDDLEWARE + THIRD_PARTY_MIDDLEWARE
 # STATIC
 # ------------------------------------------------------------------------------
 STATIC_URL = "static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "social_network", "staticfiles")
 
 # MEDIA
 # ------------------------------------------------------------------------------
-MEDIA_ROOT = str(BASE_DIR / "media")
+MEDIA_ROOT = os.path.join(BASE_DIR, "social_network", "media")
 MEDIA_URL = "/media/"
 IMAGE_URL_SERVE = config("IMAGE_URL_SERVE")
 

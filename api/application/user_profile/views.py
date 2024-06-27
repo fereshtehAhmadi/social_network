@@ -1,10 +1,12 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.application.user_profile.serializers import AppUserInformationGetSerializer
+from api.application.user_profile.serializers import AppUserInformationGetSerializer, AppUserInformationPostSerializer
+from apps.profiles.models import CustomerProfile
 from tools.project.common.constants.cons import manualParametersDictCons
 from tools.project.swagger_tools import SwaggerAutoSchemaKwargs
 
@@ -14,6 +16,7 @@ manualParametersDict = dict(
 
 operation_id = dict(
     user_information_get="نمایش اطلاعات کاربر",
+    user_information_post="ارسال اطلاعات کاربر",
 )
 
 tags = ['profile/پروفایل']
@@ -30,6 +33,12 @@ class AppProfileAPI(viewsets.ViewSet):
         GET=dict(
             user_information_get={
                 "responses": {200: AppUserInformationGetSerializer},
+            }
+        ),
+        POST=dict(
+            user_information_post={
+                "request_body": AppUserInformationPostSerializer,
+                "responses": {200: "OK"},
             }
         )
     )
@@ -48,13 +57,30 @@ class AppProfileAPI(viewsets.ViewSet):
             serializer=serializers_dict.get("GET"),
         )
     )
-    @action(methods=["GET"], detail=False)
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="POST",
+            action_name="user_information_post",
+            serializer=serializers_dict.get("POST"),
+        )
+    )
+    @action(methods=["GET", "POST"], detail=False, parser_classes=(FormParser, MultiPartParser))
     def user_information(self, request, **kwargs):
         """
         display and update user information
         first_name, last_name, avatar
         """
-        if request.method == 'GET':
+        if request.method == 'POST':
+            customer_profile = CustomerProfile.objects.filter(user=request.user).first()
+            serializer = AppUserInformationPostSerializer(instance=request.user, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            avatar = serializer.validated_data.pop('avatar', None)
+            serializer.save()
+
+            customer_profile.avatar = avatar
+            customer_profile.save()
+
+        else:
             serializer = AppUserInformationGetSerializer(request.user)
             return Response(serializer.data)
 

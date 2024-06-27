@@ -2,6 +2,8 @@
 # ------------------------------------------------------------------------------
 SECRET_KEY=
 USE_DOCKER=0
+DEBUG=1
+ALLOW_HOSTS='127.0.0.1'
 
 # Redis
 # ------------------------------------------------------------------------------
@@ -14,4 +16,4 @@ CELERY_BROKER_URL=
 # Flower
 CELERY_FLOWER_USER=admin
 CELERY_FLOWER_PASSWORD=123
-IMAGE_URL_SERVE=http://127.0.0.1:8000/media/
+IMAGE_URL_SERVE=http://127.0.0.1:8008
