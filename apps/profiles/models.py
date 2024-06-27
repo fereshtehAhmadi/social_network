@@ -50,7 +50,7 @@ class CustomerProfile(BaseModel):
         upload_to=customer_profile_avatar_path,
     )
     bio = models.TextField(null=True, blank=True)
-    slug = models.CharField(max_length=15)
+    slug = models.CharField(max_length=15, null=True, blank=True)
 
     STR_RETURN_LIST = ["pk", "user__id"]
     UNIQUE_CHECK_LIST = [(["is_active", "slug"], Q()), ('user', Q())]

@@ -161,9 +161,9 @@ class AppVerificationAPI(viewsets.ViewSet):
 
             customer_profile.avatar = avatar
             customer_profile.save()
+            return Response("OK")
 
         else:
             serializer = AppUserInformationGetSerializer(request.user)
             return Response(serializer.data)
 
-        return Response("OK")
