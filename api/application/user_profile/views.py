@@ -79,10 +79,12 @@ class AppProfileAPI(viewsets.ViewSet):
             serializer.is_valid(raise_exception=True)
             first_name = serializer.validated_data.pop('first_name')
             last_name = serializer.validated_data.pop('last_name')
+            username = serializer.validated_data.pop('username')
             serializer.save()
 
             customer_profile.user.first_name = first_name
             customer_profile.user.last_name = last_name
+            customer_profile.user.username = username
             customer_profile.user.save()
             return Response('OK')
 
