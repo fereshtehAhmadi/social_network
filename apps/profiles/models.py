@@ -8,7 +8,7 @@ from django.conf import settings
 
 from apps.base.models import BaseModel
 from apps.profiles.user_managers import CustomUserManager
-from tools.project.common.validators import phone_regex, slug_regex
+from tools.project.common.validators import phone_regex
 
 
 class User(BaseModel, AbstractUser):

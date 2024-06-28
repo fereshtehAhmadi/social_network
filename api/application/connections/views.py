@@ -8,10 +8,8 @@ from rest_framework.response import Response
 
 from api.application.connections.filters import CustomerProfilesFilter
 from api.application.connections.serializers import AppUserListSerializer
-from apps.profiles.models import CustomerProfile
 
 from tools.project.common.constants.cons import manualParametersDictCons
-from tools.project.common.helper_func import FactoryGetObject
 from tools.project.swagger_tools import SwaggerAutoSchemaKwargs
 
 manualParametersDict = dict(

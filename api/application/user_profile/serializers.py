@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from apps.profiles.models import User, CustomerProfile
 from tools.django.django_tools import get_dynamic_attr
-from tools.project.common.validators import slug_regex
 
 
 class AppProfileInformationGetSerializer(serializers.ModelSerializer):

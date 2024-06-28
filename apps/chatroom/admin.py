@@ -10,8 +10,10 @@ class ConnectionAdmin(RelatedFieldAdminMixin, BaseModelAdmin):
         "id",
         "customer__pk",
         "connection__pk",
+        "accepted",
     ]
     search_fields = ['id', 'customer__pk']
+    list_filter = ['accepted']
     autocomplete_fields = ["customer", "connection"]
 
 
