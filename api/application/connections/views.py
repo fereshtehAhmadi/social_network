@@ -59,7 +59,6 @@ class AppConnectionsAPI(viewsets.ViewSet):
     @action(methods=["GET"], detail=False, parser_classes=(FormParser, MultiPartParser))
     def users_list(self, request, **kwargs):
         """
-
         display users list
         """
         customers = CustomerProfilesFilter(request.GET).qs.filter(is_active=True).order_by('id')
