@@ -19,7 +19,7 @@ class CustomerProfileAdmin(RelatedFieldAdminMixin, BaseModelAdmin):
     list_display = [
         "id",
         "user",
-        "slug",
+        "public",
     ]
     search_fields = ["user__phone_number", ]
     autocomplete_fields = ["user"]

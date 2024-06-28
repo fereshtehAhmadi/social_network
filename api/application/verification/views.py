@@ -166,4 +166,3 @@ class AppVerificationAPI(viewsets.ViewSet):
         else:
             serializer = AppUserInformationGetSerializer(request.user)
             return Response(serializer.data)
-

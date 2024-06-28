@@ -50,10 +50,10 @@ class CustomerProfile(BaseModel):
         upload_to=customer_profile_avatar_path,
     )
     bio = models.TextField(null=True, blank=True)
-    slug = models.CharField(max_length=15, null=True, blank=True, validators=[slug_regex], unique=True)
+    public = models.BooleanField(default=True)
 
     STR_RETURN_LIST = ["pk", "user__id"]
-    UNIQUE_CHECK_LIST = [(["slug", "is_active"], Q()), ('user', Q())]
+    UNIQUE_CHECK_LIST = [('user', Q())]
 
     class Meta:
         verbose_name = "Customer Profile"

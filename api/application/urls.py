@@ -8,6 +8,7 @@ from api.application.connections.router import app_connections_router
 from api.application.user_profile.router import app_profile_router
 from api.application.verification.router import app_verification_router
 
+
 app_common_urls = [
     path("verification/", include(app_verification_router.urls)),
     path("profile/", include(app_profile_router.urls)),
