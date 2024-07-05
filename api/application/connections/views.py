@@ -1,3 +1,4 @@
+from django.db.models import Q
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
@@ -105,7 +106,9 @@ class AppConnectionsAPI(viewsets.ViewSet):
         if the person's page is public, the request will be approved by default
         and if it is private, it needs user approval.
         """
-        connection = Connection.objects.filter(customer__pk=kwargs.get('pk'), connection__user=request.user)
+        connection = Connection.objects.filter(~Q(accepted=False),
+                                               customer__pk=kwargs.get('pk'),
+                                               connection__user=request.user)
         if not connection.exists():
             sender = CustomerProfile.objects.get(user=request.user)
             receiver = CustomerProfile.objects.get(pk=kwargs.get('pk'))
@@ -113,4 +116,3 @@ class AppConnectionsAPI(viewsets.ViewSet):
             Connection.objects.create(connection=sender,
                                       customer=receiver, accepted=accepted)
         return Response('OK')
-
