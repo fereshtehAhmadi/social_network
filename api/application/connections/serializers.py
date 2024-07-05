@@ -5,7 +5,7 @@ from apps.profiles.models import CustomerProfile
 from tools.django.django_tools import get_dynamic_attr
 
 
-class AppConnectionUserSerializer(serializers.ModelSerializer):
+class AppSenderUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     first_name = serializers.CharField(source='user.first_name', read_only=True)
     last_name = serializers.CharField(source='user.last_name', read_only=True)
@@ -20,11 +20,17 @@ class AppConnectionUserSerializer(serializers.ModelSerializer):
 
 
 class AppRequestsListSerializer(serializers.ModelSerializer):
-    connection = AppConnectionUserSerializer()
+    user = serializers.SerializerMethodField('get_user')
 
     class Meta:
         model = Connection
-        fields = ['id', 'accepted', 'connection', ]
+        fields = ['id', 'accepted', 'user', ]
+
+    def get_user(self, obj):
+        if obj.sender.user == self.context.get('user'):
+            return AppSenderUserSerializer(obj.receiver).data
+        else:
+            return AppSenderUserSerializer(obj.sender).data
 
 
 class AppConnectionListSerializer(AppRequestsListSerializer):

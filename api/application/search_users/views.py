@@ -98,5 +98,5 @@ class AppSearchUsersAPI(viewsets.ViewSet):
         display selected user profile
         """
         customer = CustomerProfile.objects.get(pk=kwargs.get('pk'))
-        serializer = AppUserProfileSerializer(customer, context={'user': request.user})
+        serializer = AppUserProfileSerializer(customer)
         return Response(serializer.data)

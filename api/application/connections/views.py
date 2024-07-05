@@ -6,7 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.application.request_manager.serializers import (
+from api.application.connections.serializers import (
     AppRequestsListSerializer,
     AppConnectionListSerializer,
 )
@@ -40,7 +40,7 @@ get_swagger_kwargs = SwaggerAutoSchemaKwargs(
 ).get_kwargs
 
 
-class AppRequestManagerAPI(viewsets.ViewSet):
+class AppConnectionsAPI(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     serializers_dict = dict(
@@ -108,7 +108,7 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         accept follow request
         """
         connection = Connection.objects.filter(receiver__user=request.user, accepted__isnull=True, is_active=True)
-        serializer = AppRequestsListSerializer(connection, many=True)
+        serializer = AppRequestsListSerializer(connection, context={'user': request.user}, many=True)
 
         return Response(serializer.data)
 
@@ -146,7 +146,7 @@ class AppRequestManagerAPI(viewsets.ViewSet):
                                                   Q(receiver__user=request.user),
                                                   accepted__in=[True, None],
                                                   pk=kwargs.get('pk'))
-        connection.accepted = False
+        connection.is_active = False
         connection.save()
         return Response('OK')
 
@@ -164,5 +164,5 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         """
         connection = Connection.objects.filter(Q(sender__user=request.user) | Q(receiver__user=request.user),
                                                accepted=True, is_active=True)
-        serializer = AppConnectionListSerializer(connection, many=True)
+        serializer = AppConnectionListSerializer(connection, context={'user': request.user}, many=True)
         return Response(serializer.data)
