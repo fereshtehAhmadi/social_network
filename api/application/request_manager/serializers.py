@@ -27,9 +27,5 @@ class AppRequestsListSerializer(serializers.ModelSerializer):
         fields = ['id', 'accepted', 'connection', ]
 
 
-class AppFollowersListSerializer(AppRequestsListSerializer):
-    pass
-
-
-class AppFollowingListSerializer(AppRequestsListSerializer):
+class AppConnectionListSerializer(AppRequestsListSerializer):
     pass

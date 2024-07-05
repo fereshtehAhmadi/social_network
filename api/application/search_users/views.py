@@ -6,8 +6,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.application.connections.filters import CustomerProfilesFilter
-from api.application.connections.serializers import AppUserListSerializer, AppUserProfileSerializer
+from api.application.search_users.filters import CustomerProfilesFilter
+from api.application.search_users.serializers import AppUserListSerializer, AppUserProfileSerializer
 from apps.profiles.models import CustomerProfile
 
 from tools.project.common.constants.cons import manualParametersDictCons
@@ -26,14 +26,14 @@ operation_id = dict(
     user_profile="صفحه کاربر",
 )
 
-tags = ['connection/شبکه']
+tags = ['app_search_users_router/جستجو کاربران']
 operationDescriptionsDict = dict()
 get_swagger_kwargs = SwaggerAutoSchemaKwargs(
     manualParametersDict, operationDescriptionsDict, tags, operation_id
 ).get_kwargs
 
 
-class AppConnectionsAPI(viewsets.ViewSet):
+class AppSearchUsersAPI(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
     serializers_dict = dict(
@@ -65,7 +65,6 @@ class AppConnectionsAPI(viewsets.ViewSet):
     def users_list(self, request, **kwargs):
         """
         display users list
-
         """
         customers = CustomerProfilesFilter(request.GET).qs.filter(is_active=True).order_by('id').exclude(user=request.user)
         return Response(AppUserListSerializer(customers, many=True).data)

@@ -50,7 +50,7 @@ class CustomerProfile(BaseModel):
         upload_to=customer_profile_avatar_path,
     )
     bio = models.TextField(null=True, blank=True)
-    public = models.BooleanField(null=True, blank=True)
+    public = models.BooleanField(default=True)
 
     STR_RETURN_LIST = ["pk", "user__id"]
     UNIQUE_CHECK_LIST = [('user', Q())]

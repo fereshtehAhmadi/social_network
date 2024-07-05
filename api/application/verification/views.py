@@ -1,3 +1,4 @@
+import random
 import uuid
 
 from drf_yasg.utils import swagger_auto_schema
@@ -123,8 +124,9 @@ class AppVerificationAPI(viewsets.ViewSet):
         else:
             user = User.objects.create(username=f'customer_{serializer.validated_data.get("phone_number")}',
                                        phone_number=serializer.validated_data.get("phone_number"))
-            user.set_password(str(uuid.uuid4))
             assign_role(user=user, role=UserRoleChoice.CUSTOMER)
+            user.set_password(str(random.randint(10000, 99999)))
+            user.save()
             CustomerProfile.objects.get_or_create(user=user)
 
         refresh = AppLoginValidateOtpSerializer.get_token(user)
