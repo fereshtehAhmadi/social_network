@@ -6,17 +6,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.application.chatroom.serializers import AppChatRoomSerializer
-from api.application.connections.serializers import (
-    AppRequestsListSerializer,
-    AppConnectionListSerializer,
-)
+from api.application.chatroom.serializers import AppChatRoomSerializer, AppChatRoomConnectionsListSerializer
+
 from apps.account.models import Connection
 from apps.chatroom.models import ChatRoom
-from apps.profiles.models import CustomerProfile
 
 from tools.project.common.constants.cons import manualParametersDictCons
-from tools.project.common.helper_func import FactoryGetObject
 from tools.project.swagger_tools import SwaggerAutoSchemaKwargs
 
 manualParametersDict = dict(
@@ -29,6 +24,7 @@ manualParametersDict = dict(
 
 operation_id = dict(
     chatroom="لیست چت روم ها",
+    connection_list="لیست کاربران",
 )
 
 tags = ['chatroom/چت روم']
@@ -45,6 +41,9 @@ class AppChatroomAPI(viewsets.ViewSet):
         GET=dict(
             chatroom={
                 "responses": {200: AppChatRoomSerializer},
+            },
+            connection_list={
+                "responses": {200: AppChatRoomConnectionsListSerializer},
             },
         )
     )
@@ -72,5 +71,22 @@ class AppChatroomAPI(viewsets.ViewSet):
         """
         chatroom = ChatRoom.objects.filter(Q(sender__user=request.user) | Q(receiver__user=request.user),
                                            is_active=True)
-        serializer = AppChatRoomSerializer(chatroom, many=True)
+        serializer = AppChatRoomSerializer(chatroom, context={'user': request.user}, many=True)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="GET",
+            action_name="connection_list",
+            serializer=serializers_dict.get("GET"),
+        )
+    )
+    @action(methods=["GET"], detail=False, url_path='connection/list')
+    def connection_list(self, request, **kwargs):
+        """
+        display following list
+        """
+        connection = Connection.objects.filter(Q(sender__user=request.user) | Q(receiver__user=request.user),
+                                               accepted=True, is_active=True)
+        serializer = AppChatRoomConnectionsListSerializer(connection, context={'user': request.user}, many=True)
         return Response(serializer.data)

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.account.models import Connection
 from apps.chatroom.models import ChatRoom
 from apps.profiles.models import CustomerProfile
 from tools.django.dynamic_attr import get_dynamic_attr
@@ -32,3 +33,16 @@ class AppChatRoomSerializer(serializers.ModelSerializer):
         else:
             return AppChatRoomUserSerializer(obj.sender).data
 
+
+class AppChatRoomConnectionsListSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField('get_user')
+
+    class Meta:
+        model = Connection
+        fields = ['id', 'accepted', 'user', ]
+
+    def get_user(self, obj):
+        if obj.sender.user == self.context.get('user'):
+            return AppChatRoomUserSerializer(obj.receiver).data
+        else:
+            return AppChatRoomUserSerializer(obj.sender).data
