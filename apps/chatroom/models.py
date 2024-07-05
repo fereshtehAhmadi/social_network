@@ -20,9 +20,9 @@ class NewMessage(BaseModel):
 
 
 class ChatRoom(BaseModel):
-    customer = models.ForeignKey('profiles.CustomerProfile', on_delete=models.CASCADE)
-    connection = models.ForeignKey('profiles.CustomerProfile', on_delete=models.PROTECT,
-                                   related_name='chatroom_connections')
+    sender = models.ForeignKey('profiles.CustomerProfile', on_delete=models.CASCADE)
+    receiver = models.ForeignKey('profiles.CustomerProfile', on_delete=models.CASCADE,
+                                 related_name='chatroom_receiver')
     new_messages = models.IntegerField(default=0)
 
     STR_RETURN_LIST = ["pk", "customer_profile__user__id"]

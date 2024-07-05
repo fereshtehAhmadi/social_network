@@ -19,12 +19,12 @@ class NewMessageAdmin(RelatedFieldAdminMixin, BaseModelAdmin):
 class InsuranceOrderFlowAdmin(RelatedFieldAdminMixin, BaseModelAdmin):
     list_display = [
         "id",
-        "customer__pk",
-        "connection__pk",
+        "sender__pk",
+        "receiver__pk",
         "new_messages",
     ]
-    search_fields = ['id', 'customer__user__phone_number']
-    autocomplete_fields = ["customer", "connection"]
+    search_fields = ['id', 'sender__user__phone_number']
+    autocomplete_fields = ["sender", "receiver"]
 
 
 @admin.register(Message)
