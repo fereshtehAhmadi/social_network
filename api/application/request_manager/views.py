@@ -96,7 +96,7 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         """
         accept follow request
         """
-        connection = Connection.objects.filter(customer__user=request.user)
+        connection = Connection.objects.filter(customer__user=request.user, accepted__isnull=True)
         serializer = AppRequestsListSerializer(connection, many=True)
 
         return Response(serializer.data)
@@ -113,7 +113,7 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         """
         accept follow request
         """
-        connection = FactoryGetObject.find_object(Connection, pk=kwargs.get('pk'), accepted__isull=True)
+        connection = FactoryGetObject.find_object(Connection, pk=kwargs.get('pk'), accepted__isnull=True)
         connection.accepted = True
         connection.save()
 

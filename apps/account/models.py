@@ -6,7 +6,7 @@ from apps.base.models import BaseModel
 class Connection(BaseModel):
     customer = models.ForeignKey('profiles.CustomerProfile', on_delete=models.PROTECT, related_name='connections')
     connection = models.ForeignKey('profiles.CustomerProfile', on_delete=models.PROTECT, related_name='my_connections')
-    accepted = models.BooleanField(default=False)
+    accepted = models.BooleanField(null=True, blank=True)
 
     STR_RETURN_LIST = ["pk"]
 
