@@ -206,4 +206,3 @@ class AppRequestManagerAPI(viewsets.ViewSet):
                                                   connection__user=request.user, is_active=True)
         connection.accepted = False
         return Response('OK')
-
