@@ -113,3 +113,4 @@ class AppConnectionsAPI(viewsets.ViewSet):
             Connection.objects.create(connection=sender,
                                       customer=receiver, accepted=accepted)
         return Response('OK')
+
