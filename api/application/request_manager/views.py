@@ -6,7 +6,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.application.request_manager.serializers import AppRequestsListSerializer
+from api.application.request_manager.serializers import AppRequestsListSerializer, AppFollowersListSerializer, \
+    AppFollowingListSerializer
 from apps.account.models import Connection
 from apps.profiles.models import CustomerProfile
 
@@ -27,6 +28,8 @@ operation_id = dict(
     requests_list="لیست درخواست ها",
     accept_follow_request="قبول درخواست",
     reject_follow_request="رد درخواست/ حذف فالوور",
+    followers_list="لیست دنبال کنندگان",
+    following_list="لیست دنبال شوندگان",
 )
 
 tags = ['request_manager/مدیریت درخواست ها']
@@ -52,6 +55,12 @@ class AppRequestManagerAPI(viewsets.ViewSet):
             },
             reject_follow_request={
                 "responses": {200: 'OK'},
+            },
+            followers_list={
+                "responses": {200: AppFollowersListSerializer},
+            },
+            following_list={
+                "responses": {200: AppFollowingListSerializer},
             },
         )
     )
@@ -95,7 +104,7 @@ class AppRequestManagerAPI(viewsets.ViewSet):
             serializer=serializers_dict.get("GET"),
         )
     )
-    @action(methods=["GET"], detail=False)
+    @action(methods=["GET"], detail=False, url_path='requests/list')
     def requests_list(self, request, **kwargs):
         """
         accept follow request
@@ -140,3 +149,36 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         connection.accepted = False
         connection.save()
         return Response('OK')
+
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="GET",
+            action_name="followers_list",
+            serializer=serializers_dict.get("GET"),
+        )
+    )
+    @action(methods=["GET"], detail=False, url_path='followers/list')
+    def followers_list(self, request, **kwargs):
+        """
+        display followers list
+        """
+        connection = Connection.objects.filter(customer__user=request.user, accepted=True)
+        serializer = AppFollowersListSerializer(connection, many=True)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="GET",
+            action_name="following_list",
+            serializer=serializers_dict.get("GET"),
+        )
+    )
+    @action(methods=["GET"], detail=False, url_path='following/list')
+    def following_list(self, request, **kwargs):
+        """
+        display following list
+        """
+        connection = Connection.objects.filter(connection__user=request.user, accepted=True)
+        serializer = AppFollowingListSerializer(connection, many=True)
+        return Response(serializer.data)
+

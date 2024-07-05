@@ -25,3 +25,11 @@ class AppRequestsListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Connection
         fields = ['id', 'accepted', 'connection', ]
+
+
+class AppFollowersListSerializer(AppRequestsListSerializer):
+    pass
+
+
+class AppFollowingListSerializer(AppRequestsListSerializer):
+    pass
