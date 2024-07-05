@@ -26,6 +26,7 @@ operation_id = dict(
     send_follow_request="ارسال درخواست دنبال کردن",
     requests_list="لیست درخواست ها",
     accept_follow_request="قبول درخواست",
+    reject_follow_request="رد درخواست/ حذف فالوور",
 )
 
 tags = ['request_manager/مدیریت درخواست ها']
@@ -47,6 +48,9 @@ class AppRequestManagerAPI(viewsets.ViewSet):
                 "responses": {200: AppRequestsListSerializer},
             },
             accept_follow_request={
+                "responses": {200: 'OK'},
+            },
+            reject_follow_request={
                 "responses": {200: 'OK'},
             },
         )
@@ -113,8 +117,26 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         """
         accept follow request
         """
-        connection = FactoryGetObject.find_object(Connection, pk=kwargs.get('pk'), accepted__isnull=True)
+        connection = FactoryGetObject.find_object(Connection, pk=kwargs.get('pk'), customer__user=request.user,
+                                                  accepted__isnull=True)
         connection.accepted = True
         connection.save()
+        return Response('OK')
 
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="GET",
+            action_name="reject_follow_request",
+            serializer=serializers_dict.get("GET"),
+        )
+    )
+    @action(methods=["GET"], detail=True)
+    def reject_follow_request(self, request, **kwargs):
+        """
+        reject follow request or delete user to followers list
+        """
+        connection = FactoryGetObject.find_object(Connection, pk=kwargs.get('pk'), customer__user=request.user,
+                                                  accepted__in=[True, None])
+        connection.accepted = False
+        connection.save()
         return Response('OK')
