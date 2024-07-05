@@ -89,7 +89,7 @@ class AppConnectionsAPI(viewsets.ViewSet):
         display selected user profile
         """
         customer = CustomerProfile.objects.get(pk=kwargs.get('pk'))
-        serializer = AppUserProfileSerializer(customer)
+        serializer = AppUserProfileSerializer(customer, context={'user': request.user})
         return Response(serializer.data)
 
     @swagger_auto_schema(

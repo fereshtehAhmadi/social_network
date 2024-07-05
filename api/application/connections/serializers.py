@@ -30,9 +30,12 @@ class AppUserProfileSerializer(serializers.ModelSerializer):
         model = CustomerProfile
         fields = ['id', 'username', 'first_name', 'last_name', 'avatar', 'public', 'following', ]
 
-    def get_get_following(self, obj):
-        connection = Connection.objects.filter(customer=obj, connection=self.context.get('user'))
+    def get_avatar(self, obj):
+        return get_dynamic_attr(obj, 'get_dynamic_url')
+
+    def get_following(self, obj):
+        connection = Connection.objects.filter(customer=obj, connection__user=self.context.get('user'))
         if connection.exists():
-            return connection.first().accepted()
+            return connection.first().accepted
         else:
             return False
