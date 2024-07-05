@@ -126,7 +126,7 @@ class AppVerificationAPI(viewsets.ViewSet):
                                        phone_number=serializer.validated_data.get("phone_number"))
             assign_role(user=user, role=UserRoleChoice.CUSTOMER)
             user.set_password(str(random.randint(10000, 99999)))
-            user.save()
+
             CustomerProfile.objects.get_or_create(user=user)
 
         refresh = AppLoginValidateOtpSerializer.get_token(user)
