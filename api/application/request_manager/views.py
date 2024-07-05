@@ -6,8 +6,11 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.application.request_manager.serializers import AppRequestsListSerializer, AppFollowersListSerializer, \
-    AppFollowingListSerializer
+from api.application.request_manager.serializers import (
+    AppRequestsListSerializer,
+    AppFollowersListSerializer,
+    AppFollowingListSerializer,
+)
 from apps.account.models import Connection
 from apps.profiles.models import CustomerProfile
 
@@ -30,6 +33,7 @@ operation_id = dict(
     reject_follow_request="رد درخواست/ حذف فالوور",
     followers_list="لیست دنبال کنندگان",
     following_list="لیست دنبال شوندگان",
+    unfollow="لغو دنبال کردن",
 )
 
 tags = ['request_manager/مدیریت درخواست ها']
@@ -62,6 +66,9 @@ class AppRequestManagerAPI(viewsets.ViewSet):
             following_list={
                 "responses": {200: AppFollowingListSerializer},
             },
+            unfollow={
+                "responses": {200: 'OK'},
+            },
         )
     )
 
@@ -88,7 +95,8 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         """
         connection = Connection.objects.filter(~Q(accepted=False),
                                                customer__pk=kwargs.get('pk'),
-                                               connection__user=request.user)
+                                               connection__user=request.user,
+                                               is_active=True)
         if not connection.exists():
             sender = CustomerProfile.objects.get(user=request.user)
             receiver = CustomerProfile.objects.get(pk=kwargs.get('pk'))
@@ -109,7 +117,7 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         """
         accept follow request
         """
-        connection = Connection.objects.filter(customer__user=request.user, accepted__isnull=True)
+        connection = Connection.objects.filter(customer__user=request.user, accepted__isnull=True, is_active=True)
         serializer = AppRequestsListSerializer(connection, many=True)
 
         return Response(serializer.data)
@@ -162,7 +170,7 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         """
         display followers list
         """
-        connection = Connection.objects.filter(customer__user=request.user, accepted=True)
+        connection = Connection.objects.filter(customer__user=request.user, accepted=True, is_active=True)
         serializer = AppFollowersListSerializer(connection, many=True)
         return Response(serializer.data)
 
@@ -178,7 +186,24 @@ class AppRequestManagerAPI(viewsets.ViewSet):
         """
         display following list
         """
-        connection = Connection.objects.filter(connection__user=request.user, accepted=True)
+        connection = Connection.objects.filter(connection__user=request.user, accepted=True, is_active=True)
         serializer = AppFollowingListSerializer(connection, many=True)
         return Response(serializer.data)
+
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="GET",
+            action_name="unfollow",
+            serializer=serializers_dict.get("GET"),
+        )
+    )
+    @action(methods=["GET"], detail=False, url_path='following/list')
+    def unfollow(self, request, **kwargs):
+        """
+        unfollow action
+        """
+        connection = FactoryGetObject.find_object(Connection, pk=kwargs.get('pk'), accepted=True,
+                                                  connection__user=request.user, is_active=True)
+        connection.accepted = False
+        return Response('OK')
 
