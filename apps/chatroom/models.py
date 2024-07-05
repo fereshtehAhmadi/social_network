@@ -19,8 +19,23 @@ class Connection(BaseModel):
         default_related_name = "connections"
 
 
+class NewMessage(BaseModel):
+    customer = models.ForeignKey('profiles.CustomerProfile', on_delete=models.CASCADE)
+    new_messages = models.IntegerField(default=0)
+
+    STR_RETURN_LIST = ["pk", "customer_profile__user__id"]
+    UNIQUE_CHECK_LIST = [(["customer_profile"], Q())]
+
+    class Meta:
+        verbose_name = "New Message"
+        verbose_name_plural = "New Message"
+        default_related_name = "new_messages"
+
+
 class ChatRoom(BaseModel):
-    customer_profile = models.ForeignKey('profiles.CustomerProfile', on_delete=models.CASCADE)
+    customer = models.ForeignKey('profiles.CustomerProfile', on_delete=models.CASCADE)
+    connection = models.ForeignKey('profiles.CustomerProfile', on_delete=models.PROTECT,
+                                   related_name='chatroom_connections')
     new_messages = models.IntegerField(default=0)
 
     STR_RETURN_LIST = ["pk", "customer_profile__user__id"]
@@ -35,12 +50,13 @@ class ChatRoom(BaseModel):
 class Message(BaseModel):
     def file_message_path(self, filename):
         return "messages/{0}/file_message/{1}".format(
-            str(self.id),
+            str(self.pk),
             "_".join([filename, str(random.randint(1000000000, 9999999999))]),
         )
 
     sender = models.ForeignKey('profiles.CustomerProfile', on_delete=models.PROTECT, related_name='sender_messages')
     receiver = models.ForeignKey('profiles.CustomerProfile', on_delete=models.PROTECT, related_name='receiver_messages')
+    chat_room = models.ForeignKey(ChatRoom, on_delete=models.PROTECT)
     message = models.TextField(null=True, blank=True)
     file_message = models.FileField(
         max_length=500,

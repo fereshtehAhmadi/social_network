@@ -43,7 +43,7 @@ class CustomerProfile(BaseModel):
             "_".join([str(random.randint(1000000000, 9999999999)), filename]),
         )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.FileField(
         max_length=500,
         null=True, blank=True,
@@ -71,11 +71,11 @@ class CustomerProfile(BaseModel):
 class AdminProfile(BaseModel):
     def admin_profile_avatar_path(self, filename):
         return "customer_profile/{0}/avatar/{1}".format(
-            str(self.user.id),
+            str(self.user.pk),
             "_".join([str(random.randint(1000000000, 9999999999)), filename]),
         )
 
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
     avatar = models.FileField(
         max_length=500,
         null=True, blank=True,
