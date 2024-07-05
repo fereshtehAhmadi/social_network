@@ -33,7 +33,7 @@ operation_id = dict(
     connection_list="لیست کاربران",
 )
 
-tags = ['request_manager/مدیریت درخواست ها']
+tags = ['connections/مدیریت درخواست ها']
 operationDescriptionsDict = dict()
 get_swagger_kwargs = SwaggerAutoSchemaKwargs(
     manualParametersDict, operationDescriptionsDict, tags, operation_id
