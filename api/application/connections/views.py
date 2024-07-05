@@ -1,4 +1,3 @@
-from django.db.models import Q
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
@@ -9,7 +8,6 @@ from rest_framework.response import Response
 
 from api.application.connections.filters import CustomerProfilesFilter
 from api.application.connections.serializers import AppUserListSerializer, AppUserProfileSerializer
-from apps.account.models import Connection
 from apps.profiles.models import CustomerProfile
 
 from tools.project.common.constants.cons import manualParametersDictCons
@@ -26,7 +24,6 @@ manualParametersDict = dict(
 operation_id = dict(
     users_list="لیست کاربران",
     user_profile="صفحه کاربر",
-    send_follow_request="ارسال درخواست دنبال کردن",
 )
 
 tags = ['connection/شبکه']
@@ -46,9 +43,6 @@ class AppConnectionsAPI(viewsets.ViewSet):
             },
             user_profile={
                 "responses": {200: AppUserProfileSerializer},
-            },
-            send_follow_request={
-                "responses": {200: 'OK'},
             },
         )
     )
@@ -95,24 +89,15 @@ class AppConnectionsAPI(viewsets.ViewSet):
     @swagger_auto_schema(
         **get_swagger_kwargs(
             method="GET",
-            action_name="send_follow_request",
+            action_name="user_profile",
             serializer=serializers_dict.get("GET"),
         )
     )
     @action(methods=["GET"], detail=True, parser_classes=(FormParser, MultiPartParser))
-    def send_follow_request(self, request, **kwargs):
+    def user_profile(self, request, **kwargs):
         """
-        send follow request to other users
-        if the person's page is public, the request will be approved by default
-        and if it is private, it needs user approval.
+        display selected user profile
         """
-        connection = Connection.objects.filter(~Q(accepted=False),
-                                               customer__pk=kwargs.get('pk'),
-                                               connection__user=request.user)
-        if not connection.exists():
-            sender = CustomerProfile.objects.get(user=request.user)
-            receiver = CustomerProfile.objects.get(pk=kwargs.get('pk'))
-            accepted = True if receiver.public else None
-            Connection.objects.create(connection=sender,
-                                      customer=receiver, accepted=accepted)
-        return Response('OK')
+        customer = CustomerProfile.objects.get(pk=kwargs.get('pk'))
+        serializer = AppUserProfileSerializer(customer, context={'user': request.user})
+        return Response(serializer.data)

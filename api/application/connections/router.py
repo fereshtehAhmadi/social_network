@@ -5,4 +5,4 @@ from api.application.connections.views import AppConnectionsAPI
 
 app_connections_router = DefaultRouter()
 
-app_connections_router.register(prefix="connections", viewset=AppConnectionsAPI, basename="connections")
+app_connections_router.register(prefix="", viewset=AppConnectionsAPI, basename="connections")

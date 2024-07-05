@@ -4,4 +4,4 @@ from api.application.verification.views import AppVerificationAPI
 
 app_verification_router = DefaultRouter()
 
-app_verification_router.register(prefix="login", viewset=AppVerificationAPI, basename="login")
+app_verification_router.register(prefix="", viewset=AppVerificationAPI, basename="login")
