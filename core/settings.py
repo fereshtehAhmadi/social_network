@@ -69,6 +69,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "apps.base",
     "apps.profiles",
+    "apps.account",
     "apps.chatroom",
     "apps.sms",
 ]

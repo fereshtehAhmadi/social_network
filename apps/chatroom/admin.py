@@ -1,20 +1,7 @@
 from django.contrib import admin
 
-from apps.chatroom.models import ChatRoom, Message, Connection, NewMessage
+from apps.chatroom.models import ChatRoom, Message, NewMessage
 from tools.django.admin import RelatedFieldAdminMixin, BaseModelAdmin
-
-
-@admin.register(Connection)
-class ConnectionAdmin(RelatedFieldAdminMixin, BaseModelAdmin):
-    list_display = [
-        "id",
-        "customer__pk",
-        "connection__pk",
-        "accepted",
-    ]
-    search_fields = ['id', 'customer__pk']
-    list_filter = ['accepted']
-    autocomplete_fields = ["customer", "connection"]
 
 
 @admin.register(NewMessage)

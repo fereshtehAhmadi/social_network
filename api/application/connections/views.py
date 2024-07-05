@@ -7,7 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.application.connections.filters import CustomerProfilesFilter
-from api.application.connections.serializers import AppUserListSerializer
+from api.application.connections.serializers import AppUserListSerializer, AppUserProfileSerializer
+from apps.account.models import Connection
+from apps.profiles.models import CustomerProfile
 
 from tools.project.common.constants.cons import manualParametersDictCons
 from tools.project.swagger_tools import SwaggerAutoSchemaKwargs
@@ -22,6 +24,8 @@ manualParametersDict = dict(
 
 operation_id = dict(
     users_list="لیست کاربران",
+    user_profile="صفحه کاربر",
+    send_follow_request="ارسال درخواست دنبال کردن",
 )
 
 tags = ['connection/شبکه']
@@ -38,7 +42,13 @@ class AppConnectionsAPI(viewsets.ViewSet):
         GET=dict(
             users_list={
                 "responses": {200: AppUserListSerializer},
-            }
+            },
+            user_profile={
+                "responses": {200: AppUserProfileSerializer},
+            },
+            send_follow_request={
+                "responses": {200: 'OK'},
+            },
         )
     )
 
@@ -64,3 +74,42 @@ class AppConnectionsAPI(viewsets.ViewSet):
         """
         customers = CustomerProfilesFilter(request.GET).qs.filter(is_active=True).order_by('id').exclude(user=request.user)
         return Response(AppUserListSerializer(customers, many=True).data)
+
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="GET",
+            action_name="user_profile",
+            serializer=serializers_dict.get("GET"),
+        )
+    )
+    @action(methods=["GET"], detail=True, parser_classes=(FormParser, MultiPartParser))
+    def user_profile(self, request, **kwargs):
+        """
+        display selected user profile
+        """
+        customer = CustomerProfile.objects.get(pk=kwargs.get('pk'))
+        serializer = AppUserProfileSerializer(customer)
+        return Response(serializer.data)
+
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="GET",
+            action_name="send_follow_request",
+            serializer=serializers_dict.get("GET"),
+        )
+    )
+    @action(methods=["GET"], detail=True, parser_classes=(FormParser, MultiPartParser))
+    def send_follow_request(self, request, **kwargs):
+        """
+        send follow request to other users
+        if the person's page is public, the request will be approved by default
+        and if it is private, it needs user approval.
+        """
+        connection = Connection.objects.filter(customer__pk=kwargs.get('pk'), connection__user=request.user)
+        if not connection.exists():
+            sender = CustomerProfile.objects.get(user=request.user)
+            receiver = CustomerProfile.objects.get(pk=kwargs.get('pk'))
+            accepted = True if receiver.public else None
+            Connection.objects.create(connection=sender,
+                                      customer=receiver, accepted=accepted)
+        return Response('OK')
