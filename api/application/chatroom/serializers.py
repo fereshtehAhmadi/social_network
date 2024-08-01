@@ -1,7 +1,8 @@
+from docutils.transforms.universal import Messages
 from rest_framework import serializers
 
 from apps.account.models import Connection
-from apps.chatroom.models import ChatRoom
+from apps.chatroom.models import ChatRoom, Message
 from apps.profiles.models import CustomerProfile
 from tools.django.dynamic_attr import get_dynamic_attr
 
@@ -46,3 +47,18 @@ class AppChatRoomConnectionsListSerializer(serializers.ModelSerializer):
             return AppChatRoomUserSerializer(obj.receiver).data
         else:
             return AppChatRoomUserSerializer(obj.sender).data
+
+
+class AppMessagesListSerializer(serializers.ModelSerializer):
+    is_sender = serializers.SerializerMethodField('get_is_sender')
+    file_message = serializers.CharField(source='get_dynamic_url')
+
+    class Meta:
+        model = Message
+        fields = ['id', 'message', 'file_message', 'is_sender', 'seen', ]
+
+    def get_is_sender(self, obj):
+        if obj.sender.user == self.context.get('user'):
+            return True
+        else:
+            return False
