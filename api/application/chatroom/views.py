@@ -3,20 +3,23 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.application.chatroom.serializers import (
     AppChatRoomSerializer,
     AppChatRoomConnectionsListSerializer,
-    AppMessagesListSerializer,
+    AppMessagesListSerializer, AppSendMessageInputSerializer,
 )
 
 from apps.account.models import Connection
-from apps.chatroom.models import ChatRoom
+from apps.chatroom.models import ChatRoom, Message
+from apps.profiles.models import CustomerProfile
 from pagination import StandardPagination
 
 from tools.project.common.constants.cons import manualParametersDictCons
+from tools.project.common.helper_func import FactoryGetObject
 from tools.project.swagger_tools import SwaggerAutoSchemaKwargs
 
 manualParametersDict = dict(
@@ -31,6 +34,7 @@ operation_id = dict(
     chatroom="لیست چت روم ها",
     connection_list="لیست کاربران",
     messages_list="لیست پیام ها",
+    send_message="ارسال پیام",
 )
 
 tags = ['chatroom/چت روم']
@@ -55,6 +59,13 @@ class AppChatroomAPI(viewsets.ViewSet):
             messages_list={
                 "responses": {200: AppMessagesListSerializer(many=True)},
             },
+        ),
+        POST=dict(
+            send_message={
+                "request_body": AppSendMessageInputSerializer,
+                "responses": {200: 'OK'},
+
+            }
         )
     )
 
@@ -123,8 +134,9 @@ class AppChatroomAPI(viewsets.ViewSet):
     @swagger_auto_schema(
         **get_swagger_kwargs(
             method="GET",
-            action_name="connection_list",
+            action_name="messages_list",
             serializer=serializers_dict.get("GET"),
+            pagination_classes=StandardPagination
         )
     )
     @action(methods=["GET"], detail=True, url_path='messages/list')
@@ -142,5 +154,45 @@ class AppChatroomAPI(viewsets.ViewSet):
                                                   serializer_cls=AppMessagesListSerializer,
                                                   context={"user": request.user},
                                                   )
+        chatroom.messages.filter(receiver=request.user).update(seen=True)
 
         return Response(response)
+
+    @swagger_auto_schema(
+        **get_swagger_kwargs(
+            method="POST",
+            action_name="send_message",
+            serializer=serializers_dict.get("POST"),
+        )
+    )
+    @action(methods=["POST"], detail=False, parser_classes=(MultiPartParser, FormParser))
+    def send_message(self, request, **kwargs):
+        """
+        display message between the user and the related person
+        """
+        serializer = AppSendMessageInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validate_data = serializer.validated_data
+        receiver = validate_data.pop('receiver')
+
+        sender = CustomerProfile.objects.get(pk=request.user.pk)
+        print(receiver)
+        print(receiver.id)
+        # receiver = FactoryGetObject.find_object(CustomerProfile, pk=kwargs.get('pk'))
+
+        chatroom = ChatRoom.objects.filter(Q(sender__user=request.user, receiver=receiver) | Q(
+            receiver__user=request.user, sender=receiver),
+                                           is_active=True)
+        print(chatroom)
+
+        if not chatroom.exists():
+            chatroom = ChatRoom.objects.create(sender=sender, receiver=receiver)
+        else:
+            chatroom = chatroom.first()
+
+        chatroom.new_messages = chatroom.new_messages + 1
+        chatroom.save()
+        print(validate_data)
+        message = Message.objects.create(chat_room=chatroom, sender=sender,receiver=receiver, **validate_data)
+
+        return Response('OK')

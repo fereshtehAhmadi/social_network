@@ -62,3 +62,10 @@ class AppMessagesListSerializer(serializers.ModelSerializer):
             return True
         else:
             return False
+
+
+class AppSendMessageInputSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Message
+        fields = ['receiver', 'message', 'file_message', ]
