@@ -1,5 +1,6 @@
 import random
 
+from decouple import config
 from django.db import models
 from django.db.models import Q
 
@@ -20,9 +21,9 @@ class NewMessage(BaseModel):
 
 
 class ChatRoom(BaseModel):
-    customer = models.ForeignKey('profiles.CustomerProfile', on_delete=models.CASCADE)
-    connection = models.ForeignKey('profiles.CustomerProfile', on_delete=models.PROTECT,
-                                   related_name='chatroom_connections')
+    sender = models.ForeignKey('profiles.CustomerProfile', on_delete=models.CASCADE)
+    receiver = models.ForeignKey('profiles.CustomerProfile', on_delete=models.CASCADE,
+                                 related_name='chatroom_receiver')
     new_messages = models.IntegerField(default=0)
 
     STR_RETURN_LIST = ["pk", "customer_profile__user__id"]
@@ -51,6 +52,7 @@ class Message(BaseModel):
         upload_to=file_message_path,
     )
     seen = models.BooleanField(default=True)
+    url_serve = models.CharField(max_length=1000, null=True, blank=True)
 
     STR_RETURN_LIST = ["pk", "sender__user__id"]
 
@@ -58,3 +60,13 @@ class Message(BaseModel):
         verbose_name = "Message"
         verbose_name_plural = "Message"
         default_related_name = "messages"
+
+    def get_dynamic_url(self):
+        if self.file_message:
+            if self.url_serve is None:
+                self.save()
+                image_url_serve = config("IMAGE_URL_SERVE")
+                return image_url_serve + "/media/" + self.file_message.name
+            return self.url_serve + "/media/" + self.file_message.name
+        else:
+            return None
