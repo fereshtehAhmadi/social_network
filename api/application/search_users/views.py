@@ -11,6 +11,7 @@ from api.application.search_users.serializers import AppUserListSerializer, AppU
 from apps.profiles.models import CustomerProfile
 
 from tools.project.common.constants.cons import manualParametersDictCons
+from tools.project.common.helper_func import FactoryGetObject
 from tools.project.swagger_tools import SwaggerAutoSchemaKwargs
 
 manualParametersDict = dict(
@@ -97,6 +98,6 @@ class AppSearchUsersAPI(viewsets.ViewSet):
         """
         display selected user profile
         """
-        customer = CustomerProfile.objects.get(pk=kwargs.get('pk'))
+        customer = FactoryGetObject.find_object(CustomerProfile, pk=kwargs.get('pk'))
         serializer = AppUserProfileSerializer(customer)
         return Response(serializer.data)

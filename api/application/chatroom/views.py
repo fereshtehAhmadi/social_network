@@ -145,7 +145,7 @@ class AppChatroomAPI(viewsets.ViewSet):
         display message between the user and the related person
         """
 
-        user = CustomerProfile.objects.get(pk=request.user.pk)
+        user = FactoryGetObject.find_object(CustomerProfile, pk=request.user.pk)
 
         chatroom = ChatRoom.objects.filter(Q(sender=user, receiver__pk=kwargs.get('pk')) | Q(
             receiver=user, sender=kwargs.get('pk')),
