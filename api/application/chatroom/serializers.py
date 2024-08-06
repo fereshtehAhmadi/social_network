@@ -58,6 +58,10 @@ class AppMessagesListSerializer(serializers.ModelSerializer):
         fields = ['id', 'message', 'file_message', 'is_sender', 'seen', ]
 
     def get_is_sender(self, obj):
+        print('********************')
+        print(obj.sender)
+        print(obj.sender.user)
+        print(self.context.get('user'))
         if obj.sender.user == self.context.get('user'):
             return True
         else:

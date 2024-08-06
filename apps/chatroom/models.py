@@ -51,7 +51,7 @@ class Message(BaseModel):
         null=True, blank=True,
         upload_to=file_message_path,
     )
-    seen = models.BooleanField(default=True)
+    seen = models.BooleanField(default=False)
     url_serve = models.CharField(max_length=1000, null=True, blank=True)
 
     STR_RETURN_LIST = ["pk", "sender__user__id"]

@@ -144,17 +144,20 @@ class AppChatroomAPI(viewsets.ViewSet):
         """
         display message between the user and the related person
         """
-        chatroom = ChatRoom.objects.filter(Q(sender__user=request.user, receiver__user__pk=kwargs.get('pk')) | Q(
-            receiver__user=request.user, sender__user__pk=kwargs.get('pk')),
+
+        user = CustomerProfile.objects.get(pk=request.user.pk)
+
+        chatroom = ChatRoom.objects.filter(Q(sender=user, receiver__pk=kwargs.get('pk')) | Q(
+            receiver=user, sender=kwargs.get('pk')),
                                            is_active=True)
 
-        queryset = chatroom.messages.all().order_by('-id')
+        queryset = chatroom.first().messages.all().order_by('-id')
 
         response = self.create_paginated_response(queryset=queryset, request=request,
                                                   serializer_cls=AppMessagesListSerializer,
                                                   context={"user": request.user},
                                                   )
-        chatroom.messages.filter(receiver=request.user).update(seen=True)
+        chatroom.first().messages.filter(receiver=user).update(seen=True)
 
         return Response(response)
 
@@ -174,25 +177,21 @@ class AppChatroomAPI(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         validate_data = serializer.validated_data
         receiver = validate_data.pop('receiver')
-
         sender = CustomerProfile.objects.get(pk=request.user.pk)
-        print(receiver)
-        print(receiver.id)
-        # receiver = FactoryGetObject.find_object(CustomerProfile, pk=kwargs.get('pk'))
 
-        chatroom = ChatRoom.objects.filter(Q(sender__user=request.user, receiver=receiver) | Q(
-            receiver__user=request.user, sender=receiver),
+        chatroom = ChatRoom.objects.filter(Q(sender=sender, receiver=receiver) | Q(
+            receiver=sender, sender=receiver),
                                            is_active=True)
         print(chatroom)
 
-        if not chatroom.exists():
-            chatroom = ChatRoom.objects.create(sender=sender, receiver=receiver)
-        else:
+        if chatroom.exists():
             chatroom = chatroom.first()
+
+        else:
+            chatroom = ChatRoom.objects.create(sender=sender, receiver=receiver)
 
         chatroom.new_messages = chatroom.new_messages + 1
         chatroom.save()
-        print(validate_data)
-        message = Message.objects.create(chat_room=chatroom, sender=sender,receiver=receiver, **validate_data)
+        message = Message.objects.create(chat_room=chatroom, sender=sender, receiver=receiver, **validate_data)
 
         return Response('OK')

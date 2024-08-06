@@ -33,8 +33,8 @@ class InsuranceOrderFlowAdmin(RelatedFieldAdminMixin, BaseModelAdmin):
         "id",
         "sender__user__pk",
         "receiver__user__pk",
-        "chat_room__pk"
+        # "chat_room__pk"
         "seen",
     ]
     search_fields = ['id', 'customer_profile__user__phone_number']
-    autocomplete_fields = ["sender", "receiver", "chat_room", ]
+    autocomplete_fields = ["sender", "receiver", ]
