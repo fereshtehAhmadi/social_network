@@ -35,6 +35,10 @@ class AppUserProfileSerializer(serializers.ModelSerializer):
         return get_dynamic_attr(obj, 'get_dynamic_url')
 
     def get_has_connection(self, obj):
+        print(obj.user)
+        print(self.context.get('user'))
+        if obj.user == self.context.get('user'):
+            return None
         connection = Connection.objects.filter(Q(sender=obj) | Q(receiver=obj))
         if connection.exists():
             return connection.first().accepted

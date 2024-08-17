@@ -86,18 +86,3 @@ class AppSearchUsersAPI(viewsets.ViewSet):
         serializer = AppUserProfileSerializer(customer, context={'user': request.user})
         return Response(serializer.data)
 
-    @swagger_auto_schema(
-        **get_swagger_kwargs(
-            method="GET",
-            action_name="user_profile",
-            serializer=serializers_dict.get("GET"),
-        )
-    )
-    @action(methods=["GET"], detail=True, parser_classes=(FormParser, MultiPartParser))
-    def user_profile(self, request, **kwargs):
-        """
-        display selected user profile
-        """
-        customer = FactoryGetObject.find_object(CustomerProfile, pk=kwargs.get('pk'))
-        serializer = AppUserProfileSerializer(customer)
-        return Response(serializer.data)
