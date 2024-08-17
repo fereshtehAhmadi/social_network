@@ -37,7 +37,7 @@ get_swagger_kwargs = SwaggerAutoSchemaKwargs(
 
 class AppSearchUsersAPI(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
-    pagination_classes = StandardPagination
+    pagination_class = StandardPagination
 
     serializers_dict = dict(
         GET=dict(
@@ -71,7 +71,7 @@ class AppSearchUsersAPI(viewsets.ViewSet):
         """
         customers = CustomerProfilesFilter(request.GET).qs.filter(is_active=True).order_by('id').exclude(
             user=request.user)
-        class_page = self.pagination_classes()
+        class_page = self.pagination_class()
         page = class_page.paginate_queryset(
             queryset=customers
             , request=request

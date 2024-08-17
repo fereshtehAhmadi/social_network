@@ -10,7 +10,8 @@ from rest_framework.response import Response
 from api.application.chatroom.serializers import (
     AppChatRoomSerializer,
     AppChatRoomConnectionsListSerializer,
-    AppMessagesListSerializer, AppSendMessageInputSerializer,
+    AppMessagesListSerializer,
+    AppSendMessageInputSerializer, AppChatRoomUserSerializer,
 )
 
 from apps.account.models import Connection
@@ -102,8 +103,10 @@ class AppChatroomAPI(viewsets.ViewSet):
         if the person's page is public, the request will be approved by default
         and if it is private, it needs user approval.
         """
+        print(request.user)
         chatroom = ChatRoom.objects.filter(Q(sender__user=request.user) | Q(receiver__user=request.user),
                                            is_active=True)
+        print(chatroom)
         response = self.create_paginated_response(queryset=chatroom, request=request,
                                                   serializer_cls=AppChatRoomSerializer,
                                                   context={"user": request.user},
@@ -145,10 +148,13 @@ class AppChatroomAPI(viewsets.ViewSet):
         display message between the user and the related person
         """
 
-        user = FactoryGetObject.find_object(CustomerProfile, pk=request.user.pk)
+        user_profile = FactoryGetObject.find_object(CustomerProfile, user__pk=request.user.pk)
 
-        chatroom = ChatRoom.objects.filter(Q(sender=user, receiver__pk=kwargs.get('pk')) | Q(
-            receiver=user, sender=kwargs.get('pk')),
+        print(user_profile.id)
+        print(kwargs.get('pk'))
+
+        chatroom = ChatRoom.objects.filter(Q(sender=user_profile, receiver__pk=kwargs.get('pk')) | Q(
+            receiver=user_profile, sender=kwargs.get('pk')),
                                            is_active=True)
 
         queryset = chatroom.first().messages.all().order_by('-id')
@@ -157,7 +163,7 @@ class AppChatroomAPI(viewsets.ViewSet):
                                                   serializer_cls=AppMessagesListSerializer,
                                                   context={"user": request.user},
                                                   )
-        chatroom.first().messages.filter(receiver=user).update(seen=True)
+        chatroom.first().messages.filter(receiver=user_profile).update(seen=True)
 
         return Response(response)
 
@@ -177,12 +183,11 @@ class AppChatroomAPI(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         validate_data = serializer.validated_data
         receiver = validate_data.pop('receiver')
-        sender = CustomerProfile.objects.get(pk=request.user.pk)
+        sender = CustomerProfile.objects.get(user__pk=request.user.pk)
 
-        chatroom = ChatRoom.objects.filter(Q(sender=sender, receiver=receiver) | Q(
-            receiver=sender, sender=receiver),
-                                           is_active=True)
-        print(chatroom)
+        chatroom = ChatRoom.objects.filter(
+            Q(sender=sender, receiver=receiver) | Q(
+                receiver=sender, sender=receiver), is_active=True)
 
         if chatroom.exists():
             chatroom = chatroom.first()

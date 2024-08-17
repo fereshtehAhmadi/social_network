@@ -1,4 +1,3 @@
-from docutils.transforms.universal import Messages
 from rest_framework import serializers
 
 from apps.account.models import Connection
@@ -40,7 +39,7 @@ class AppChatRoomConnectionsListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Connection
-        fields = ['id', 'accepted', 'user', ]
+        fields = ['id', 'user', ]
 
     def get_user(self, obj):
         if obj.sender.user == self.context.get('user'):
@@ -58,10 +57,6 @@ class AppMessagesListSerializer(serializers.ModelSerializer):
         fields = ['id', 'message', 'file_message', 'is_sender', 'seen', ]
 
     def get_is_sender(self, obj):
-        print('********************')
-        print(obj.sender)
-        print(obj.sender.user)
-        print(self.context.get('user'))
         if obj.sender.user == self.context.get('user'):
             return True
         else:
