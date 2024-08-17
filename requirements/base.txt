@@ -1,6 +1,7 @@
 django==5.0.6
 asgiref==3.8.1
 celery==5.4.0
+channels==4.1.0
 django-celery-beat==2.6.0
 django-celery-results==2.5.1
 django-cors-headers==4.4.0
@@ -19,4 +20,5 @@ python-decouple==3.8
 redis==5.0.6
 setuptools==59.6.0
 sphinx==7.3.7
+websocket=0.2.1
 zeep==4.2.1

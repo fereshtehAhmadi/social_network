@@ -64,6 +64,7 @@ THIRD_PARTY_APPS = [
     "rolepermissions",
     "drf_yasg",
     "django_filters",
+    'channels',
 ]
 
 LOCAL_APPS = [
@@ -262,6 +263,18 @@ SWAGGER_SETTINGS = {
         }
     },
     'DOC_EXPANSION': 'none',
+}
+
+# CHANNELS
+# -------------------------------------------------------------------------------
+ASGI_APPLICATION = "core.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
 }
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
