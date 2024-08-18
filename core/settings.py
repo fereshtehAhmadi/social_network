@@ -65,6 +65,7 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     "django_filters",
     'channels',
+    'corsheaders',
 ]
 
 LOCAL_APPS = [
@@ -110,6 +111,7 @@ DJANGO_MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "channels.auth.AuthMiddlewareStack",
 ]
 
 THIRD_PARTY_MIDDLEWARE = [
